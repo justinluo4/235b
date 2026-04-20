@@ -31,14 +31,15 @@ def get_grasp_pose(T_ArUco, d):
         [0.0, -1.0,  0.0],
         [0.0,  0.0, -1.0],
     ])
-    T_ArUco_g[:3, 3] = np.array([d / 2.0, d / 2.0, -thickness / 2.0])
+    T_ArUco_g[:3, 3] = np.array([d / 2.0, d / 2.0, thickness / 2.0])
+    T_ArUco_g[:3, 3] += T_ArUco[:3, 3]
 
-    return T_ArUco @ T_ArUco_g
+    return T_ArUco_g
 
 class Hanoi():
     def __init__(self, num_blocks):
         self.stacks = [[] for _ in range(3)]
-        self.stacks[0] = [3, 4, 5]
+        self.stacks[0] = [5, 4, 3]
 
     def move(self, source, target):
         target_id = 0
@@ -125,7 +126,7 @@ class RobotSim():
                    label='end effector')
 
         if self.camera_offset is not None:
-            T_cam = frames[5] @ self.camera_offset
+            T_cam = frames[6] @ self.camera_offset
             c = T_cam[:3, 3]
             c_x = T_cam[:3, 0] * axis_len
             c_y = T_cam[:3, 1] * axis_len
