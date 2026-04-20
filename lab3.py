@@ -102,12 +102,15 @@ class HanoiSolver():
         T_2 = self.markers_in_world[id_2]
         T_1_g = get_grasp_pose(T_1, self.block_sizes[id_1])
         T_2_g = get_grasp_pose(T_2, 2*self.block_sizes[id_2] - self.block_sizes[id_1])
-        T_2_g[2, 3] += 0.05
+        T_1_g[2, 3] += 0.05
+        T_2_g[2, 3] += 0.10
         self.pick_and_place(T_1_g, T_2_g)
         return True
 
 
     def pick_and_place(self, start_T, target_T):
+        print("Opening gripper...")
+        self.g.open(speed=128, force=10)
         print(f"Move from {start_T} to {target_T}")
         j = IK(start_T)
         self.rob.movej(j, 0.05, 0.05, relative=False)
