@@ -41,7 +41,7 @@ class Hanoi():
     def move(self, source, target):
         target_id = 0
         source_id = self.stacks[source][-1]
-        if len(target) == 0:
+        if len(self.stacks[target]) == 0:
             target_id = target
         else:
             target_id = self.stacks[target][-1]
