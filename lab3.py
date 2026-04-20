@@ -14,8 +14,8 @@ import pickle
 import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 from lab2_helpers import get_all_frames, IK, transform_from_DH_modified
-import urx
-from pyrobotiqur import RobotiqGripper
+import cv2
+
 import time
 from aruco import ArucoDetector
 
@@ -52,6 +52,8 @@ class Hanoi():
     
 class HanoiSolver():
     def __init__(self):
+        import urx
+        from pyrobotiqur import RobotiqGripper
         UR_IP = "192.168.0.2" 
         #initialize the robot, loosely based on our gripper
         self.rob = urx.Robot(UR_IP)
@@ -68,6 +70,7 @@ class HanoiSolver():
         
         self.markers_in_world = {}
         self.tool_frame = transform_from_DH_modified(0, 0.2, 0, 0)
+        self.cam = cv2.VideoCapture(0)
         self.aruco_detector = ArucoDetector()
 
 
@@ -126,7 +129,11 @@ class HanoiSolver():
         for location in check_locations:
             self.rob.movel((location[0], location[1], location[2], np.pi, 0, np.pi), 0.05, 0.05, relative=False)
             time.sleep(1)
-            self.markers_in_world.update(self.get_tags_in_world(self.rob.get_camera_image()))
+            ret, frame = self.cam.read()
+            if not ret:
+                print("failed to grab frame")
+                break
+            self.markers_in_world.update(self.get_tags_in_world(frame))
         return self.markers_in_world
 
     def get_cam_frame(self, cur_j):
@@ -164,7 +171,14 @@ if __name__ == "__main__":
     tags = detector.find_tags(frame)
 
     print(f"Found {len(tags)} tag(s):")
+    # Camera is facing downwards with origin at (0.0, -0.4, 0.4) and RPY (π, 0, π)
+
+    cam_T = tf.translation_matrix([0.0, -0.4, 0.4]) @ tf.euler_matrix(np.pi, 0, np.pi)
     for tag_id, T in tags:
         print(f"\nID: {tag_id}")
         print(f"  Position (x, y, z): {T[:3, 3]}")
         print(f"  Transform:\n{np.round(T, 4)}")
+        world_T = cam_T @ T
+        print(f"  world transform:\n{np.round(world_T, 4)}")
+        grasp_T = get_grasp_pose(world_T, 0.06)
+        print(f"  grasp transform:\n{np.round(grasp_T, 4)}")

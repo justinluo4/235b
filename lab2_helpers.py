@@ -451,5 +451,5 @@ def verify_pipeline():
 # Main
 # ==============================================================================
 
-verify_pipeline()
-plot_word("JointAnglesPractice.pickle")
+# verify_pipeline()
+# plot_word("JointAnglesPractice.pickle")
