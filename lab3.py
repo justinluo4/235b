@@ -77,14 +77,18 @@ class HanoiSolver():
     def start_solve(self):
         self.solve(Hanoi(3), 3, 0, 1, 2)
 
-    def solve(self, hanoi, n, source, target, auxiliary):
-        if n == 1:
-            ids = hanoi.move(source, target)
-            self.place_on_top(ids[0], ids[1])
-            return
-        self.solve(hanoi, n - 1, source, auxiliary, target)
+    def make_move(self, hanoi, source, target):
+        self.marker_search()
         ids = hanoi.move(source, target)
         self.place_on_top(ids[0], ids[1])
+        return ids
+
+    def solve(self, hanoi, n, source, target, auxiliary):
+        if n == 1:
+            self.make_move(hanoi, source, target)
+            return
+        self.solve(hanoi, n - 1, source, auxiliary, target)
+        self.make_move(hanoi, source, target)
         self.solve(hanoi, n - 1, auxiliary, target, source)
 
     def place_on_top(self, id_1, id_2):
@@ -121,8 +125,8 @@ class HanoiSolver():
 
     def marker_search(self):
         check_locations = [
-            (0.2, 0.2, 0.5),
-            (0.0, 0.4, 0.5),
+            (0.2, -0.2, 0.5),
+            (0.0, -0.4, 0.5),
             (-0.2, 0.2, 0.5),
         ]
         self.markers_in_world = {}
